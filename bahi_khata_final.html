@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#12122e">
+<title>Bahi Khata</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Baloo 2',sans-serif;background:#12122e;min-height:100vh}
+input,button,textarea{font-family:'Baloo 2',sans-serif}
+
+/* SCREENS */
+.screen{display:none;min-height:100vh}
+.screen.on{display:flex;flex-direction:column}
+
+/* ══ SHOP SELECT ══ */
+#scr-shops{background:linear-gradient(160deg,#12122e,#1a1a4e,#0a0a1a);align-items:center;justify-content:center;padding:20px}
+.sp-logo{font-size:3.5rem;margin-bottom:6px;text-align:center}
+.sp-title{color:#ffd700;font-size:1.3rem;font-weight:800;text-align:center}
+.sp-sub{color:#c8a870;font-size:.72rem;text-align:center;margin-bottom:32px}
+.sp-cards{width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px}
+.sp-card{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,215,0,.25);border-radius:14px;padding:18px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:.18s}
+.sp-card:active{transform:scale(.97);background:rgba(255,215,0,.1)}
+.sp-icon{font-size:2rem;width:50px;height:50px;background:rgba(200,134,10,.15);border-radius:11px;display:flex;align-items:center;justify-content:center}
+.sp-card h3{color:#ffd700;font-size:1rem;font-weight:800}
+.sp-card p{color:#c8a870;font-size:.68rem;margin-top:2px}
+.sp-arrow{margin-left:auto;color:#c8860a;font-size:1.4rem;font-weight:800}
+.sp-settings{margin-top:20px;width:100%;max-width:360px;padding:11px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;color:#888;font-size:.8rem;font-weight:700;cursor:pointer;text-align:center}
+
+/* ══ SETTINGS POPUP ══ */
+.popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:flex-end;justify-content:center}
+.popup-overlay.on{display:flex}
+.popup-box{background:#1a1a3e;border-radius:16px 16px 0 0;padding:20px;width:100%;max-width:500px;border-top:2px solid #c8860a}
+.popup-box h3{color:#ffd700;font-size:.9rem;font-weight:800;margin-bottom:14px}
+.popup-box label{color:#c8a870;font-size:.7rem;font-weight:700;display:block;margin-bottom:5px;margin-top:12px}
+.popup-box label:first-of-type{margin-top:0}
+.popup-box input{width:100%;padding:10px 12px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,215,0,.2);border-radius:8px;color:#fff;font-size:.84rem;outline:none}
+.popup-box input:focus{border-color:#ffd700}
+.popup-hint{font-size:.62rem;color:#555;margin-top:4px;line-height:1.5}
+.popup-btns{display:flex;gap:8px;margin-top:14px}
+.popup-btns button{flex:1;padding:10px;border:none;border-radius:8px;font-family:'Baloo 2',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer}
+.pbtn-save{background:linear-gradient(135deg,#1a6b3a,#2e8b57);color:#fff}
+.pbtn-test{background:linear-gradient(135deg,#1255a0,#1976d2);color:#fff}
+.pbtn-close{background:rgba(255,255,255,.08);color:#888}
+.test-res{font-size:.68rem;margin-top:8px;min-height:16px}
+
+/* ══ MAIN APP ══ */
+#scr-app{background:#d5c9b0}
+.book{flex:1;max-width:680px;width:100%;margin:0 auto;background:#fdf6e3;box-shadow:-4px 0 0 #7a5c10;display:flex;flex-direction:column}
+
+.hdr{background:#12122e;padding:9px 11px;display:flex;align-items:center;justify-content:space-between;gap:7px;border-bottom:3px solid #c8860a;position:sticky;top:0;z-index:100;flex-shrink:0}
+.hdr-left{display:flex;align-items:center;gap:7px}
+.back-btn{background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.3);color:#ffd700;border-radius:6px;padding:5px 8px;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.shop-badge{background:#c8860a;color:#fff;border-radius:6px;padding:3px 8px;font-size:.68rem;font-weight:800}
+.hdr-title h1{color:#ffd700;font-size:.88rem;font-weight:800;line-height:1.1}
+.hdr-title p{color:#c8a870;font-size:.56rem}
+.hdr-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.hdr-date input{background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.4);color:#ffd700;font-family:'Baloo 2',sans-serif;font-size:.76rem;font-weight:700;padding:4px 6px;border-radius:6px;outline:none;max-width:130px}
+.sale-mini{background:linear-gradient(135deg,#b45309,#f59e0b);border-radius:7px;padding:4px 8px;text-align:center;min-width:66px;border:1.5px solid rgba(255,200,50,.4);flex-shrink:0}
+.sale-mini .lbl{font-size:.5rem;color:rgba(255,255,255,.8);font-weight:700;text-transform:uppercase}
+.sale-mini .val{font-size:.88rem;font-weight:800;color:#fff}
+
+.sync-bar{padding:2px 10px;background:#0a0a20;display:flex;align-items:center;justify-content:flex-end;gap:6px;border-bottom:1px solid #c8860a;flex-shrink:0}
+.sync-badge{font-size:.56rem;padding:2px 6px;border-radius:4px;font-weight:700}
+.sync-badge.ok{background:#1a6b3a;color:#fff}
+.sync-badge.pending{background:#92400e;color:#fff}
+.sync-badge.err{background:#8b1a1a;color:#fff}
+.sync-badge.syncing{background:#1255a0;color:#fff}
+
+.tabs{display:flex;background:#f0e5cb;border-bottom:2px solid #c9a96e;flex-shrink:0}
+.tab{flex:1;padding:8px 3px;border:none;background:transparent;font-family:'Baloo 2',sans-serif;font-size:.7rem;font-weight:700;color:#888;cursor:pointer;border-bottom:3px solid transparent}
+.tab.on{color:#1a1a2e;border-bottom-color:#c8860a;background:#fdf6e3}
+
+.pg{display:none;padding:10px;flex:1;overflow-y:auto}
+.pg.on{display:block}
+
+.card{border:1.5px solid #ddc89a;border-radius:8px;overflow:hidden;margin-bottom:10px;box-shadow:0 2px 8px rgba(100,60,0,.1)}
+.card-hdr{padding:6px 11px;font-size:.67rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
+.card-hdr.green{background:#1a6b3a;color:#fff}
+.card-hdr.red{background:#8b1a1a;color:#fff}
+.card-hdr.purple{background:#5b21b6;color:#fff}
+.card-hdr.teal{background:#0369a1;color:#fff}
+.card-hdr .run{font-size:.78rem;font-weight:800;opacity:.9}
+
+.irow{display:flex;align-items:center;justify-content:space-between;padding:6px 11px;border-bottom:1px solid #f0e4c8;background:#fef9ef}
+.irow:last-child{border-bottom:none}
+.irow .nm{font-size:.74rem;font-weight:600;color:#333}
+.irow .hn{font-size:.57rem;color:#bbb;line-height:1.3}
+.irow input[type=number]{width:104px;padding:5px 7px;border:1.5px solid #ddc89a;border-radius:6px;font-family:'Baloo 2',sans-serif;font-size:.83rem;text-align:right;background:#fff;color:#1a1a2e;outline:none}
+.irow input[type=number]:focus{border-color:#c8860a;box-shadow:0 0 0 2px rgba(200,134,10,.14)}
+.irow input[type=text].advname{border:1.5px solid #ddc89a;border-radius:5px;padding:3px 7px;font-size:.74rem;font-weight:700;background:#fffde7;color:#1a6b3a;outline:none;width:128px}
+
+.trow{display:flex;justify-content:space-between;align-items:center;padding:7px 11px;font-weight:800;font-size:.81rem;border-top:2px solid #c9a96e}
+.trow.green{background:#eaf5ee;color:#1a6b3a}
+.trow.red{background:#fdf0f0;color:#8b1a1a}
+
+.exp-row{padding:7px 10px;border-bottom:1px solid #f0e4c8;background:#fef9ef}
+.exp-row:last-child{border-bottom:none}
+.exp-top{display:flex;align-items:center;gap:5px;margin-bottom:5px}
+.exp-top input[type=text]{flex:1;padding:4px 7px;border:1.5px solid #ddc89a;border-radius:5px;font-family:'Baloo 2',sans-serif;font-size:.72rem;font-weight:700;background:#fffde7;color:#4c1d95;outline:none}
+.exp-tot{font-size:.7rem;font-weight:800;color:#5b21b6;white-space:nowrap}
+.exp-subs{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.exp-subs label{font-size:.59rem;color:#aaa;display:block;margin-bottom:2px}
+.exp-subs input[type=number]{width:100%;padding:4px 6px;border:1.5px solid #ddc89a;border-radius:5px;font-family:'Baloo 2',sans-serif;font-size:.8rem;text-align:right;background:#fff;outline:none}
+.exp-subs input[type=number]:focus{border-color:#c8860a}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px}
+.two-col .card{margin-bottom:0}
+
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px}
+.cbox{border-radius:8px;overflow:hidden;border:2px solid #c9a96e}
+.cbox-hdr{padding:5px 9px;font-size:.63rem;font-weight:800;text-align:center;text-transform:uppercase}
+.cbox-hdr.green{background:#1a6b3a;color:#fff}
+.cbox-hdr.red{background:#8b1a1a;color:#fff}
+.cbox-val{padding:9px;text-align:center;font-size:1.1rem;font-weight:800;background:#fef9ef}
+.cbox-val.green{color:#1a6b3a}
+.cbox-val.red{color:#8b1a1a}
+.cbox-note{font-size:.56rem;color:#999;text-align:center;padding:0 5px 5px;background:#fef9ef}
+
+.sale-block{border:2px solid #f59e0b;border-radius:10px;overflow:hidden;margin-bottom:10px;box-shadow:0 3px 12px rgba(245,158,11,.16)}
+.sale-block-hdr{background:linear-gradient(90deg,#92400e,#d97706);color:#fff;padding:7px 12px;display:flex;justify-content:space-between;align-items:center}
+.sale-block-hdr span{font-size:.82rem;font-weight:800}
+.sale-block-hdr .auto{background:rgba(255,255,255,.2);border-radius:5px;font-size:.54rem;padding:2px 6px}
+.sale-block-body{background:#fff8e0;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sale-formula{font-size:.65rem;color:#92400e;line-height:1.8;flex:1}
+.sale-formula strong{display:block;font-size:.7rem;color:#78350f;margin-bottom:2px}
+.sale-amount{font-size:1.55rem;font-weight:800;color:#d97706;text-align:right;min-width:92px}
+
+.carry-block{border:2px solid #e65100;border-radius:9px;overflow:hidden;margin-bottom:10px}
+.carry-hdr{background:#e65100;color:#fff;padding:6px 12px;font-size:.68rem;font-weight:800}
+.carry-body{background:#fff3e0;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.carry-txt{font-size:.68rem;color:#bf360c;line-height:1.6}
+.carry-txt strong{display:block;font-size:.74rem}
+.carry-amt{font-size:1.2rem;font-weight:800;color:#e65100;text-align:right}
+.carry-foot{font-size:.59rem;color:#e65100;text-align:center;padding:5px;background:#fff3e0;border-top:1px dashed #ffab91;font-style:italic}
+
+.sv-g{color:#1a6b3a;font-weight:700}
+.sv-r{color:#8b1a1a;font-weight:700}
+.sv-o{color:#d97706;font-weight:800}
+
+.hist-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:.7rem;min-width:320px}
+table th{background:#1a1a2e;color:#ffd700;padding:6px 7px;text-align:right;font-weight:700;white-space:nowrap}
+table th:first-child{text-align:left}
+table td{padding:6px 7px;border-bottom:1px solid #f0e4c8;text-align:right;white-space:nowrap}
+table td:first-child{text-align:left;color:#555}
+table tr:nth-child(even) td{background:#faf5e8}
+table tfoot td{background:#fff8e0;font-weight:800;border-top:2px solid #c9a96e}
+.td-g{color:#1a6b3a;font-weight:700}
+.td-o{color:#d97706;font-weight:700}
+.td-r{color:#8b1a1a;font-weight:700}
+.empty-msg{text-align:center;padding:28px;color:#bbb;font-size:.8rem}
+
+.btns{display:flex;flex-wrap:wrap;gap:7px;padding:9px 0 4px;border-top:2px dashed #c9a96e;margin-top:10px}
+.btn{padding:9px 13px;border:none;border-radius:7px;font-family:'Baloo 2',sans-serif;font-size:.76rem;font-weight:700;cursor:pointer}
+.btn-save{background:linear-gradient(135deg,#1a6b3a,#2e8b57);color:#fff}
+.btn-clear{background:#fff0f0;color:#c62828;border:1.5px solid #fca5a5}
+.btn-nav{background:linear-gradient(135deg,#1255a0,#1976d2);color:#fff}
+.btn-sync{background:linear-gradient(135deg,#374151,#4b5563);color:#fff}
+
+textarea{width:100%;min-height:44px;padding:7px 9px;margin-top:6px;border:1.5px solid #ddc89a;border-radius:7px;font-family:'Baloo 2',sans-serif;font-size:.76rem;background:#fff;resize:vertical;outline:none}
+.notes-lbl{font-size:.68rem;font-weight:700;color:#888}
+
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a6b3a;color:#fff;padding:9px 16px;border-radius:9px;font-weight:700;font-size:.74rem;box-shadow:0 4px 16px rgba(0,0,0,.3);opacity:0;transition:all .28s;z-index:9999;white-space:nowrap;max-width:92vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+</style>
+</head>
+<body>
+
+<!-- ══ SHOP SELECT ══ -->
+<div class="screen on" id="scr-shops">
+  <div class="sp-logo">🍽️</div>
+  <div class="sp-title">Restaurant Bahi Khata</div>
+  <div class="sp-sub">रोज़ाना नकद बही खाता • Select Shop</div>
+  <div class="sp-cards">
+    <div class="sp-card" onclick="openShop('shop1','Shop 1')">
+      <div class="sp-icon">🏪</div>
+      <div><h3>Shop 1</h3><p>Tap to open daily entry</p></div>
+      <div class="sp-arrow">›</div>
+    </div>
+    <div class="sp-card" onclick="openShop('shop2','Shop 2')">
+      <div class="sp-icon">🍜</div>
+      <div><h3>Shop 2</h3><p>Tap to open daily entry</p></div>
+      <div class="sp-arrow">›</div>
+    </div>
+  </div>
+  <button class="sp-settings" onclick="openSettings()">⚙️ Google Sheets Settings</button>
+</div>
+
+<!-- ══ SETTINGS POPUP ══ -->
+<div class="popup-overlay" id="settings-popup" onclick="closeSettingsOutside(event)">
+  <div class="popup-box">
+    <h3>⚙️ Google Sheets Settings</h3>
+    <label>Apps Script Web App URL</label>
+    <input type="url" id="set-url" placeholder="https://script.google.com/macros/s/.../exec">
+    <div class="popup-hint">Paste your Google Apps Script deployment URL here. Data will auto-sync every time you save an entry.</div>
+    <div class="popup-btns">
+      <button class="pbtn-save" onclick="saveSettings()">💾 Save</button>
+      <button class="pbtn-test" onclick="testConnection()">🔗 Test</button>
+      <button class="pbtn-close" onclick="closeSettings()">✕ Close</button>
+    </div>
+    <div class="test-res" id="test-res"></div>
+  </div>
+</div>
+
+<!-- ══ MAIN APP ══ -->
+<div class="screen" id="scr-app">
+<div class="book">
+
+  <div class="hdr">
+    <div class="hdr-left">
+      <button class="back-btn" onclick="goBack()">← Shops</button>
+      <div>
+        <div class="shop-badge" id="app-shop-badge">Shop 1</div>
+        <div class="hdr-title" style="margin-top:2px">
+          <h1>Bahi Khata</h1>
+          <p>Daily Cash Register • रोज़ाना हिसाब</p>
+        </div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <div class="hdr-date"><input type="date" id="inp-date"></div>
+      <div class="sale-mini">
+        <div class="lbl">🌟 Sale</div>
+        <div class="val" id="mini-sale">₹0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sync-bar">
+    <span class="sync-badge pending" id="sync-badge">⏳ Not synced</span>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" id="tab-entry"   onclick="showTab('entry')">📝 Entry</button>
+    <button class="tab"    id="tab-summary" onclick="showTab('summary')">📊 Summary</button>
+    <button class="tab"    id="tab-history" onclick="showTab('history')">📅 History</button>
+  </div>
+
+  <!-- ── ENTRY ── -->
+  <div class="pg on" id="pg-entry">
+
+    <div class="card">
+      <div class="card-hdr green"><span>🏦 Cash Credit / Opening</span><span class="run" id="run-credit">₹0</span></div>
+      <div class="irow">
+        <div><div class="nm">Cash Credit</div><div class="hn">कल का Total Cash Debit → आज Opening</div></div>
+        <input type="number" id="cashCredit" placeholder="0" min="0">
+      </div>
+      <div class="irow">
+        <div><input type="text" id="adv1name" placeholder="Advance 1..." class="advname"></div>
+        <input type="number" id="adv1" placeholder="0" min="0">
+      </div>
+      <div class="irow">
+        <div><input type="text" id="adv2name" placeholder="Advance 2..." class="advname"></div>
+        <input type="number" id="adv2" placeholder="0" min="0">
+      </div>
+      <div class="trow green"><span>Total Cash Credit</span><span id="tot-credit">₹0</span></div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-hdr purple"><span>🧾 Expenses</span><span class="run" id="run-exp">₹0</span></div>
+        <div class="exp-row">
+          <div class="exp-top"><input type="text" id="e1name" placeholder="Expense 1..."><span class="exp-tot" id="e1tot">₹0</span></div>
+          <div class="exp-subs">
+            <div><label>Sub A</label><input type="number" id="e1a" placeholder="0" min="0"></div>
+            <div><label>Sub B</label><input type="number" id="e1b" placeholder="0" min="0"></div>
+          </div>
+        </div>
+        <div class="exp-row">
+          <div class="exp-top"><input type="text" id="e2name" placeholder="Expense 2..."><span class="exp-tot" id="e2tot">₹0</span></div>
+          <div class="exp-subs">
+            <div><label>Sub A</label><input type="number" id="e2a" placeholder="0" min="0"></div>
+            <div><label>Sub B</label><input type="number" id="e2b" placeholder="0" min="0"></div>
+          </div>
+        </div>
+        <div class="exp-row">
+          <div class="exp-top"><input type="text" id="e3name" placeholder="Expense 3..."><span class="exp-tot" id="e3tot">₹0</span></div>
+          <div class="exp-subs">
+            <div><label>Sub A</label><input type="number" id="e3a" placeholder="0" min="0"></div>
+            <div><label>Sub B</label><input type="number" id="e3b" placeholder="0" min="0"></div>
+          </div>
+        </div>
+        <div class="trow red"><span>Total Exp</span><span id="tot-exp">₹0</span></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr teal"><span>📱 UPI</span><span class="run" id="run-upi">₹0</span></div>
+        <div class="exp-row">
+          <div class="exp-top"><input type="text" id="upiname" placeholder="Platform..."></div>
+          <div class="exp-subs">
+            <div><label>UPI In</label><input type="number" id="upiIn" placeholder="0" min="0"></div>
+            <div><label>UPI Out</label><input type="number" id="upiOut" placeholder="0" min="0"></div>
+          </div>
+        </div>
+        <div class="trow red"><span>Total UPI</span><span id="tot-upi">₹0</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr red"><span>💵 Total Cash Debit (Closing)</span><span class="run" id="run-cd">₹0</span></div>
+      <div class="irow">
+        <div><div class="nm">Cash Available</div><div class="hn" id="prev-hint">कल का Cash + Cash Sale</div></div>
+        <input type="number" id="prevCash" placeholder="0" min="0">
+      </div>
+      <div class="irow">
+        <div><div class="nm">Cash Sale / नकद बिक्री</div></div>
+        <input type="number" id="cashSale" placeholder="0" min="0">
+      </div>
+      <div class="irow">
+        <div><div class="nm">Cash in Counter</div></div>
+        <input type="number" id="counter" placeholder="0" min="0">
+      </div>
+      <div class="trow red" style="flex-direction:column;align-items:stretch;gap:2px">
+        <div style="display:flex;justify-content:space-between"><span>Total Cash Debit</span><span id="tot-cd">₹0</span></div>
+        <div style="font-size:.58rem;color:#a33;font-style:italic">🔁 यह कल का Cash Credit बनेगा</div>
+      </div>
+    </div>
+
+    <div class="compare">
+      <div class="cbox"><div class="cbox-hdr green">✅ Grand LEFT</div><div class="cbox-val green" id="cmp-left">₹0</div><div class="cbox-note">Credit + Sale</div></div>
+      <div class="cbox"><div class="cbox-hdr red">⛔ Grand RIGHT</div><div class="cbox-val red" id="cmp-right">₹0</div><div class="cbox-note">Debit+Exp+UPI</div></div>
+    </div>
+
+    <div class="sale-block">
+      <div class="sale-block-hdr"><span>🌟 TOTAL SALE — आज की बिक्री</span><span class="auto">AUTO</span></div>
+      <div class="sale-block-body">
+        <div class="sale-formula"><strong>Sale = Grand Right − Total Cash Credit</strong>Automatically calculated</div>
+        <div class="sale-amount" id="sale-display">₹0</div>
+      </div>
+    </div>
+
+    <div class="carry-block">
+      <div class="carry-hdr">🔁 Tomorrow's Cash Credit / कल का Opening Balance</div>
+      <div class="carry-body">
+        <div class="carry-txt"><strong>Today's Total Cash Debit</strong>Enter as Cash Credit tomorrow</div>
+        <div class="carry-amt" id="carry-display">₹0</div>
+      </div>
+      <div class="carry-foot">✏️ कल सुबह यही नंबर Cash Credit में डालें</div>
+    </div>
+
+    <div class="notes-lbl">📝 Notes / टिप्पणी</div>
+    <textarea id="notes" placeholder="Today's remarks..."></textarea>
+
+    <div class="btns">
+      <button class="btn btn-save"  onclick="saveEntry()">💾 Save</button>
+      <button class="btn btn-clear" onclick="clearForm()">🗑️ Clear</button>
+      <button class="btn btn-nav"   onclick="showTab('summary')">📊 Summary →</button>
+    </div>
+  </div>
+
+  <!-- ── SUMMARY ── -->
+  <div class="pg" id="pg-summary">
+    <div style="font-size:.84rem;font-weight:800;color:#1a1a2e;margin-bottom:10px">
+      📊 Summary <span style="background:#c8860a;color:#fff;border-radius:7px;padding:1px 7px;font-size:.62rem" id="s-date"></span>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr green"><span>🏦 Cash Credit / Opening</span><span class="run" id="s-run-credit">₹0</span></div>
+      <div class="irow"><div><div class="nm">Cash Credit</div></div><span class="sv-g" id="s-cc">₹0</span></div>
+      <div class="irow"><div><div class="nm" id="s-adv1name">Advance 1</div></div><span class="sv-g" id="s-adv1">₹0</span></div>
+      <div class="irow"><div><div class="nm" id="s-adv2name">Advance 2</div></div><span class="sv-g" id="s-adv2">₹0</span></div>
+      <div class="trow green"><span>Total Cash Credit</span><span id="s-tc">₹0</span></div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-hdr purple"><span>🧾 Expenses</span><span class="run" id="s-run-exp">₹0</span></div>
+        <div class="irow"><div><div class="nm" id="s-e1name">Exp 1</div></div><span style="font-weight:700;color:#5b21b6" id="s-e1">₹0</span></div>
+        <div class="irow"><div><div class="nm" id="s-e2name">Exp 2</div></div><span style="font-weight:700;color:#5b21b6" id="s-e2">₹0</span></div>
+        <div class="irow"><div><div class="nm" id="s-e3name">Exp 3</div></div><span style="font-weight:700;color:#5b21b6" id="s-e3">₹0</span></div>
+        <div class="trow red"><span>Total Exp</span><span id="s-exp">₹0</span></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr teal"><span>📱 UPI</span><span class="run" id="s-run-upi">₹0</span></div>
+        <div class="irow"><div><div class="nm" id="s-upiname">UPI</div></div></div>
+        <div class="irow"><div><div class="nm">UPI In</div></div><span style="font-weight:700;color:#0369a1" id="s-upiIn">₹0</span></div>
+        <div class="irow"><div><div class="nm">UPI Out</div></div><span style="font-weight:700;color:#0369a1" id="s-upiOut">₹0</span></div>
+        <div class="trow red"><span>Total UPI</span><span id="s-upi">₹0</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr red"><span>💵 Total Cash Debit (Closing)</span><span class="run" id="s-run-cd">₹0</span></div>
+      <div class="irow"><div><div class="nm">Cash Available</div></div><span class="sv-r" id="s-prev">₹0</span></div>
+      <div class="irow"><div><div class="nm">Cash Sale</div></div><span class="sv-r" id="s-cs">₹0</span></div>
+      <div class="irow"><div><div class="nm">Counter Cash</div></div><span class="sv-r" id="s-ctr">₹0</span></div>
+      <div class="trow red" style="flex-direction:column;align-items:stretch;gap:2px">
+        <div style="display:flex;justify-content:space-between"><span>Total Cash Debit</span><span id="s-cd">₹0</span></div>
+        <div style="font-size:.58rem;color:#a33;font-style:italic">🔁 यह कल का Cash Credit बनेगा</div>
+      </div>
+    </div>
+
+    <div class="compare">
+      <div class="cbox"><div class="cbox-hdr green">✅ Grand LEFT</div><div class="cbox-val green" id="s-gl">₹0</div><div class="cbox-note">Credit + Sale</div></div>
+      <div class="cbox"><div class="cbox-hdr red">⛔ Grand RIGHT</div><div class="cbox-val red" id="s-gr">₹0</div><div class="cbox-note">Debit+Exp+UPI</div></div>
+    </div>
+
+    <div class="sale-block">
+      <div class="sale-block-hdr"><span>🌟 TOTAL SALE — आज की बिक्री</span><span class="auto">AUTO</span></div>
+      <div class="sale-block-body">
+        <div class="sale-formula"><strong>Sale = Grand Right − Total Cash Credit</strong>Automatically calculated</div>
+        <div class="sale-amount" id="s-sale">₹0</div>
+      </div>
+    </div>
+
+    <div class="carry-block">
+      <div class="carry-hdr">🔁 Tomorrow's Cash Credit / कल का Opening</div>
+      <div class="carry-body">
+        <div class="carry-txt"><strong>Today's Total Cash Debit</strong>Enter as Cash Credit tomorrow</div>
+        <div class="carry-amt" id="s-carry">₹0</div>
+      </div>
+      <div class="carry-foot">✏️ कल सुबह यही नंबर Cash Credit में डालें</div>
+    </div>
+
+    <div class="btns">
+      <button class="btn btn-save" onclick="saveEntry()">💾 Save</button>
+      <button class="btn btn-nav"  onclick="showTab('history')">📅 History →</button>
+    </div>
+  </div>
+
+  <!-- ── HISTORY ── -->
+  <div class="pg" id="pg-history">
+    <div style="font-size:.84rem;font-weight:800;color:#1a1a2e;margin-bottom:10px">
+      📅 History <span style="background:#c8860a;color:#fff;border-radius:7px;padding:1px 7px;font-size:.62rem" id="h-count">0 entries</span>
+    </div>
+    <div id="hist-container"><div class="empty-msg">No entries yet.</div></div>
+    <div class="btns">
+      <button class="btn btn-sync" onclick="syncAllToSheets()">☁️ Sync All to Sheets</button>
+      <button class="btn btn-nav"  onclick="exportCSV()">📥 Export CSV</button>
+      <button class="btn btn-clear" onclick="clearHistory()">🗑️ Clear All</button>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div class="toast" id="toast-msg"></div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════
+var CURRENT_SHOP_KEY  = '';   // 'shop1' or 'shop2'
+var CURRENT_SHOP_NAME = '';   // 'Shop 1' or 'Shop 2'
+var HISTORY = [];
+var SHEETS_URL = '';
+
+// ══════════════════════════════════════════════════════
+//  STORAGE
+// ══════════════════════════════════════════════════════
+async function stGet(key) {
+  try { if (window.storage) { var r = await window.storage.get(key); return r ? JSON.parse(r.value) : null; } } catch(e) {}
+  try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch(e) { return null; }
+}
+async function stSet(key, val) {
+  try { if (window.storage) { await window.storage.set(key, JSON.stringify(val)); return; } } catch(e) {}
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+}
+
+// ══════════════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════════════
+function gn(id) { var v = parseFloat(document.getElementById(id).value); return isNaN(v) ? 0 : v; }
+function st(id, t) { var el = document.getElementById(id); if (el) el.textContent = t; }
+function gv(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+function sv(id, v) { var el = document.getElementById(id); if (el) el.value = v || ''; }
+function rp(n) { return '₹' + Math.round(n).toLocaleString('en-IN'); }
+
+function toast(msg, bg) {
+  var t = document.getElementById('toast-msg');
+  t.textContent = msg; t.style.background = bg || '#1a6b3a';
+  t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); }, 3200);
+}
+
+function setSyncBadge(status) {
+  var b = document.getElementById('sync-badge');
+  if (!b) return;
+  var map = {
+    ok:      ['sync-badge ok',      '✅ Synced to Sheets'],
+    pending: ['sync-badge pending', '⏳ Not synced'],
+    err:     ['sync-badge err',     '❌ Sync failed'],
+    syncing: ['sync-badge syncing', '🔄 Syncing...']
+  };
+  var m = map[status] || map.pending;
+  b.className = m[0]; b.textContent = m[1];
+}
+
+// ══════════════════════════════════════════════════════
+//  SETTINGS
+// ══════════════════════════════════════════════════════
+async function openSettings() {
+  var url = await stGet('sheets-url');
+  if (url) document.getElementById('set-url').value = url;
+  document.getElementById('settings-popup').classList.add('on');
+}
+function closeSettings() {
+  document.getElementById('settings-popup').classList.remove('on');
+  document.getElementById('test-res').textContent = '';
+}
+function closeSettingsOutside(e) {
+  if (e.target.id === 'settings-popup') closeSettings();
+}
+async function saveSettings() {
+  var url = document.getElementById('set-url').value.trim();
+  if (!url) { toast('Paste your Apps Script URL first', '#c62828'); return; }
+  await stSet('sheets-url', url);
+  SHEETS_URL = url;
+  toast('✅ Settings saved!');
+  closeSettings();
+}
+async function testConnection() {
+  var url = document.getElementById('set-url').value.trim();
+  var res = document.getElementById('test-res');
+  if (!url) { res.textContent = '❌ Paste URL first'; res.style.color = '#f87171'; return; }
+  res.textContent = '🔄 Testing...'; res.style.color = '#888';
+  try {
+    var r = await fetch(url + '?action=getDashboard');
+    var d = await r.json();
+    if (d.success !== undefined) {
+      res.textContent = '✅ Connected! Google Sheets is working.';
+      res.style.color = '#4ade80';
+    } else {
+      res.textContent = '⚠️ Got response but unexpected format';
+      res.style.color = '#fbbf24';
+    }
+  } catch(e) {
+    res.textContent = '❌ Cannot connect. Check URL & deployment settings.';
+    res.style.color = '#f87171';
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  SHOP OPEN / BACK
+// ══════════════════════════════════════════════════════
+async function openShop(key, name) {
+  CURRENT_SHOP_KEY  = key;
+  CURRENT_SHOP_NAME = name;
+  HISTORY = await stGet('hist-' + key) || [];
+
+  document.getElementById('app-shop-badge').textContent = name;
+
+  // Set today's date
+  var t = new Date();
+  var d = t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0') + '-' + String(t.getDate()).padStart(2,'0');
+  document.getElementById('inp-date').value = d;
+
+  // Load today's entry or reset with autofill
+  var todayEntry = null, lastEntry = HISTORY.length > 0 ? HISTORY[0] : null;
+  for (var i = 0; i < HISTORY.length; i++) { if (HISTORY[i].date === d) { todayEntry = HISTORY[i]; break; } }
+
+  if (todayEntry) loadEntryData(todayEntry);
+  else resetForm(lastEntry);
+
+  SHEETS_URL = await stGet('sheets-url') || '';
+  setSyncBadge('pending');
+
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('on'); });
+  document.getElementById('scr-app').classList.add('on');
+  showTab('entry');
+}
+
+function goBack() {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('on'); });
+  document.getElementById('scr-shops').classList.add('on');
+}
+
+// ══════════════════════════════════════════════════════
+//  CALCULATE
+// ══════════════════════════════════════════════════════
+function calculate() {
+  var cc = gn('cashCredit'), a1 = gn('adv1'), a2 = gn('adv2'), tCr = cc + a1 + a2;
+  var e1 = gn('e1a')+gn('e1b'), e2 = gn('e2a')+gn('e2b'), e3 = gn('e3a')+gn('e3b'), tExp = e1+e2+e3;
+  var upiIn = gn('upiIn'), upiOut = gn('upiOut'), tUpi = upiIn + upiOut;
+  var prev = gn('prevCash'), cs = gn('cashSale'), ctr = gn('counter'), tCD = prev + cs + ctr;
+  var gRight = tCD + tExp + tUpi, sale = gRight - tCr, gLeft = tCr + sale;
+
+  // Entry
+  st('run-credit', rp(tCr));   st('tot-credit', rp(tCr));
+  st('e1tot', rp(e1));         st('e2tot', rp(e2));         st('e3tot', rp(e3));
+  st('run-exp', rp(tExp));     st('tot-exp', rp(tExp));
+  st('run-upi', rp(tUpi));     st('tot-upi', rp(tUpi));
+  st('run-cd', rp(tCD));       st('tot-cd', rp(tCD));
+  st('cmp-left', rp(gLeft));   st('cmp-right', rp(gRight));
+  st('sale-display', rp(sale));st('mini-sale', rp(sale));   st('carry-display', rp(tCD));
+
+  // Summary
+  var d = gv('inp-date');
+  if (d) { try { st('s-date', new Date(d+'T00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'2-digit'})); } catch(e) { st('s-date',d); } }
+  var nm1=gv('e1name')||'Exp 1', nm2=gv('e2name')||'Exp 2', nm3=gv('e3name')||'Exp 3';
+  var an1=gv('adv1name')||'Advance 1', an2=gv('adv2name')||'Advance 2';
+  st('s-run-credit',rp(tCr)); st('s-cc',rp(cc)); st('s-adv1',rp(a1)); st('s-adv2',rp(a2)); st('s-tc',rp(tCr));
+  st('s-adv1name',an1); st('s-adv2name',an2);
+  st('s-run-exp',rp(tExp)); st('s-e1name',nm1); st('s-e1',rp(e1)); st('s-e2name',nm2); st('s-e2',rp(e2)); st('s-e3name',nm3); st('s-e3',rp(e3)); st('s-exp',rp(tExp));
+  st('s-run-upi',rp(tUpi)); st('s-upiname',gv('upiname')||'UPI'); st('s-upiIn',rp(upiIn)); st('s-upiOut',rp(upiOut)); st('s-upi',rp(tUpi));
+  st('s-run-cd',rp(tCD)); st('s-prev',rp(prev)); st('s-cs',rp(cs)); st('s-ctr',rp(ctr)); st('s-cd',rp(tCD));
+  st('s-gl',rp(gLeft)); st('s-gr',rp(gRight)); st('s-sale',rp(sale)); st('s-carry',rp(tCD));
+}
+
+['cashCredit','adv1','adv2','e1a','e1b','e2a','e2b','e3a','e3b','upiIn','upiOut','prevCash','cashSale','counter'].forEach(function(id){
+  document.getElementById(id).addEventListener('input', calculate);
+});
+
+document.getElementById('inp-date').addEventListener('change', function(){
+  var lastEntry = HISTORY.length > 0 ? HISTORY[0] : null;
+  var existing = null;
+  for (var i=0; i<HISTORY.length; i++) { if (HISTORY[i].date === this.value) { existing = HISTORY[i]; break; } }
+  if (existing) loadEntryData(existing);
+  else resetForm(lastEntry);
+});
+
+// ══════════════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════════════
+function showTab(name) {
+  ['entry','summary','history'].forEach(function(n){
+    document.getElementById('pg-'+n).classList.remove('on');
+    document.getElementById('tab-'+n).classList.remove('on');
+  });
+  document.getElementById('pg-'+name).classList.add('on');
+  document.getElementById('tab-'+name).classList.add('on');
+  if (name === 'summary') calculate();
+  if (name === 'history') renderHistory();
+}
+
+// ══════════════════════════════════════════════════════
+//  SAVE
+// ══════════════════════════════════════════════════════
+async function saveEntry() {
+  var date = gv('inp-date');
+  if (!date) { toast('⚠️ Select a date!', '#c62828'); return; }
+  var cc=gn('cashCredit'), a1=gn('adv1'), a2=gn('adv2'), tCr=cc+a1+a2;
+  var e1=gn('e1a')+gn('e1b'), e2=gn('e2a')+gn('e2b'), e3=gn('e3a')+gn('e3b'), tExp=e1+e2+e3;
+  var upiIn=gn('upiIn'), upiOut=gn('upiOut'), tUpi=upiIn+upiOut;
+  var prev=gn('prevCash'), cs=gn('cashSale'), ctr=gn('counter'), tCD=prev+cs+ctr;
+  var gRight=tCD+tExp+tUpi, sale=gRight-tCr, gLeft=tCr+sale;
+  var entry = {
+    date:date, cashCredit:cc, adv1:a1, adv2:a2, tCr:tCr,
+    adv1name:gv('adv1name'), adv2name:gv('adv2name'),
+    e1name:gv('e1name'), e1a:gn('e1a'), e1b:gn('e1b'),
+    e2name:gv('e2name'), e2a:gn('e2a'), e2b:gn('e2b'),
+    e3name:gv('e3name'), e3a:gn('e3a'), e3b:gn('e3b'), tExp:tExp,
+    upiIn:upiIn, upiOut:upiOut, upiName:gv('upiname'), tUpi:tUpi,
+    prevCash:prev, cashSale:cs, counter:ctr, tCD:tCD,
+    gRight:gRight, sale:sale, gLeft:gLeft,
+    notes:gv('notes'), savedAt:new Date().toISOString(), synced:false
+  };
+  var idx = -1;
+  for (var i=0; i<HISTORY.length; i++) { if (HISTORY[i].date === date) { idx=i; break; } }
+  if (idx >= 0) HISTORY[idx] = entry; else HISTORY.unshift(entry);
+  HISTORY.sort(function(a,b){ return b.date.localeCompare(a.date); });
+  await stSet('hist-' + CURRENT_SHOP_KEY, HISTORY);
+  toast('✅ Saved!  🌟 Sale: ' + rp(sale));
+  // Auto sync
+  if (SHEETS_URL) syncEntry(entry);
+  else setSyncBadge('pending');
+}
+
+// ══════════════════════════════════════════════════════
+//  GOOGLE SHEETS SYNC
+// ══════════════════════════════════════════════════════
+async function syncEntry(entry) {
+  if (!SHEETS_URL) return;
+  setSyncBadge('syncing');
+  try {
+    var res = await fetch(SHEETS_URL, {
+      method: 'POST',
+      body: JSON.stringify({action:'saveEntry', shop:CURRENT_SHOP_NAME, entry:entry})
+    });
+    var d = await res.json();
+    if (d.success) {
+      entry.synced = true;
+      await stSet('hist-' + CURRENT_SHOP_KEY, HISTORY);
+      setSyncBadge('ok');
+    } else {
+      setSyncBadge('err');
+      toast('Sync failed: ' + (d.error||'unknown'), '#8b1a1a');
+    }
+  } catch(e) {
+    setSyncBadge('err');
+  }
+}
+
+async function syncAllToSheets() {
+  if (!SHEETS_URL) { toast('⚙️ Set Google Sheets URL in Settings first', '#92400e'); return; }
+  var unsynced = HISTORY.filter(function(h){ return !h.synced; });
+  if (!unsynced.length) { toast('✅ All entries already synced!'); return; }
+  setSyncBadge('syncing');
+  toast('🔄 Syncing ' + unsynced.length + ' entries...');
+  var ok = 0, fail = 0;
+  for (var i = 0; i < unsynced.length; i++) {
+    try {
+      var r = await fetch(SHEETS_URL, {method:'POST', body:JSON.stringify({action:'saveEntry', shop:CURRENT_SHOP_NAME, entry:unsynced[i]})});
+      var d = await r.json();
+      if (d.success) { unsynced[i].synced = true; ok++; } else fail++;
+    } catch(e) { fail++; }
+  }
+  await stSet('hist-' + CURRENT_SHOP_KEY, HISTORY);
+  setSyncBadge(fail > 0 ? 'err' : 'ok');
+  toast('☁️ Done: ' + ok + ' synced' + (fail > 0 ? ', ' + fail + ' failed' : ''), fail > 0 ? '#92400e' : '#1a6b3a');
+  renderHistory();
+}
+
+// ══════════════════════════════════════════════════════
+//  RESET / CLEAR / LOAD
+// ══════════════════════════════════════════════════════
+function resetForm(lastEntry) {
+  ['adv1','adv2','adv1name','adv2name','e1a','e1b','e2a','e2b','e3a','e3b',
+   'e1name','e2name','e3name','upiIn','upiOut','upiname','cashSale','counter','notes'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  var cc = document.getElementById('cashCredit');
+  cc.value = (lastEntry && lastEntry.tCD > 0) ? lastEntry.tCD : '';
+  var pc = document.getElementById('prevCash');
+  var hint = document.getElementById('prev-hint');
+  if (lastEntry && (lastEntry.prevCash > 0 || lastEntry.cashSale > 0)) {
+    var autoPC = (lastEntry.prevCash||0) + (lastEntry.cashSale||0);
+    pc.value = autoPC;
+    if (hint) hint.textContent = 'Auto: ₹'+(lastEntry.prevCash||0).toLocaleString('en-IN')+' + ₹'+(lastEntry.cashSale||0).toLocaleString('en-IN')+' = ₹'+autoPC.toLocaleString('en-IN');
+  } else {
+    pc.value = '';
+    if (hint) hint.textContent = 'कल का Cash + Cash Sale';
+  }
+  calculate();
+}
+
+function clearForm() {
+  if (!confirm('Clear all fields?')) return;
+  resetForm(HISTORY.length > 0 ? HISTORY[0] : null);
+}
+
+function loadEntryData(h) {
+  sv('inp-date', h.date);
+  sv('cashCredit', h.cashCredit); sv('adv1', h.adv1); sv('adv2', h.adv2);
+  sv('adv1name', h.adv1name);    sv('adv2name', h.adv2name);
+  sv('e1name', h.e1name); sv('e1a', h.e1a); sv('e1b', h.e1b);
+  sv('e2name', h.e2name); sv('e2a', h.e2a); sv('e2b', h.e2b);
+  sv('e3name', h.e3name); sv('e3a', h.e3a); sv('e3b', h.e3b);
+  sv('upiIn', h.upiIn); sv('upiOut', h.upiOut); sv('upiname', h.upiName);
+  sv('prevCash', h.prevCash); sv('cashSale', h.cashSale); sv('counter', h.counter);
+  sv('notes', h.notes);
+  setSyncBadge(h.synced ? 'ok' : 'pending');
+  calculate();
+}
+
+// ══════════════════════════════════════════════════════
+//  HISTORY
+// ══════════════════════════════════════════════════════
+function renderHistory() {
+  var container = document.getElementById('hist-container');
+  st('h-count', HISTORY.length + ' entries');
+  if (!HISTORY.length) { container.innerHTML = '<div class="empty-msg">No entries yet. Start adding daily entries!</div>'; return; }
+  var tSale = 0, tExp = 0, rows = '';
+  for (var i = 0; i < HISTORY.length; i++) {
+    var h = HISTORY[i]; tSale += h.sale||0; tExp += h.tExp||0;
+    var dt = ''; try { dt = new Date(h.date+'T00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'2-digit'}); } catch(e) { dt = h.date; }
+    var syncDot = h.synced ? '<span style="color:#1a6b3a;font-size:.58rem"> ✅</span>' : '<span style="color:#c8860a;font-size:.58rem"> ⏳</span>';
+    rows += '<tr>'
+      + '<td>'+dt+syncDot+'</td>'
+      + '<td class="td-g">'+rp(h.tCr||0)+'</td>'
+      + '<td class="td-o">'+rp(h.sale||0)+'</td>'
+      + '<td class="td-r">'+rp(h.tExp||0)+'</td>'
+      + '<td class="td-r">'+rp(h.tCD||0)+'</td>'
+      + '<td><button onclick="loadFromHistory(\''+h.date+'\')" style="padding:2px 5px;border:1px solid #ccc;border-radius:4px;cursor:pointer;font-size:.62rem;background:#fff">Load</button></td>'
+      + '</tr>';
+  }
+  container.innerHTML = '<div class="hist-wrap"><table>'
+    + '<thead><tr><th>Date</th><th>💚 Credit</th><th>🌟 Sale</th><th>🧾 Exp</th><th>💵 Debit</th><th></th></tr></thead>'
+    + '<tbody>'+rows+'</tbody>'
+    + '<tfoot><tr><td>TOTAL</td><td>—</td><td class="td-o">'+rp(tSale)+'</td><td class="td-r">'+rp(tExp)+'</td><td>—</td><td></td></tr></tfoot>'
+    + '</table></div>';
+}
+
+function loadFromHistory(date) {
+  var h = null;
+  for (var i=0; i<HISTORY.length; i++) { if (HISTORY[i].date === date) { h = HISTORY[i]; break; } }
+  if (!h) return;
+  loadEntryData(h);
+  showTab('entry');
+  toast('📂 Loaded: ' + date);
+}
+
+function exportCSV() {
+  if (!HISTORY.length) { toast('No data to export', '#c62828'); return; }
+  var out = 'Shop,Date,Cash Credit,Adv1,Adv2,Total Credit,Total Exp,UPI,Cash Available,Cash Sale,Counter,Total Debit,Grand Right,Sale\n';
+  for (var i=0; i<HISTORY.length; i++) {
+    var h = HISTORY[i];
+    out += [CURRENT_SHOP_NAME,h.date,h.cashCredit||0,h.adv1||0,h.adv2||0,h.tCr||0,h.tExp||0,h.tUpi||0,h.prevCash||0,h.cashSale||0,h.counter||0,h.tCD||0,h.gRight||0,h.sale||0].join(',') + '\n';
+  }
+  var a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(out);
+  a.download = CURRENT_SHOP_NAME.replace(' ','_') + '_bahi_khata.csv';
+  a.click(); toast('📥 CSV Exported!');
+}
+
+async function clearHistory() {
+  if (!confirm('Delete ALL history for ' + CURRENT_SHOP_NAME + '? This cannot be undone.')) return;
+  HISTORY = [];
+  await stSet('hist-' + CURRENT_SHOP_KEY, HISTORY);
+  renderHistory();
+  toast('🗑️ History cleared');
+}
+
+// ══════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════
+(async function init(){
+  var url = await stGet('sheets-url');
+  if (url) { SHEETS_URL = url; document.getElementById('set-url').value = url; }
+})();
+</script>
+</body>
+</html>
